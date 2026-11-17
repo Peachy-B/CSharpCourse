@@ -1,0 +1,14 @@
+C:\GDV\JYS\Test\Test\bin\Debug\net9.0\Test.exe
+C:\GDV\JYS\Test\Test\bin\Debug\net9.0\Test.deps.json
+C:\GDV\JYS\Test\Test\bin\Debug\net9.0\Test.runtimeconfig.json
+C:\GDV\JYS\Test\Test\bin\Debug\net9.0\Test.dll
+C:\GDV\JYS\Test\Test\bin\Debug\net9.0\Test.pdb
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\Test.GeneratedMSBuildEditorConfig.editorconfig
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\Test.AssemblyInfoInputs.cache
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\Test.AssemblyInfo.cs
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\Test.csproj.CoreCompileInputs.cache
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\Test.dll
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\refint\Test.dll
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\Test.pdb
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\Test.genruntimeconfig.cache
+C:\GDV\JYS\Test\Test\obj\Debug\net9.0\ref\Test.dll
