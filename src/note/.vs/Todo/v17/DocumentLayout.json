@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\GDV\\CSharpCourse\\src\\Todo\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{849EED93-F2F9-450D-9679-F10ADD901B26}|Todo\\Todo.csproj|c:\\gdv\\csharpcourse\\src\\todo\\todo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{849EED93-F2F9-450D-9679-F10ADD901B26}|Todo\\Todo.csproj|solutionrelative:todo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\GDV\\CSharpCourse\\src\\Todo\\Todo\\Program.cs",
+              "RelativeDocumentMoniker": "Todo\\Program.cs",
+              "ToolTip": "C:\\GDV\\CSharpCourse\\src\\Todo\\Todo\\Program.cs",
+              "RelativeToolTip": "Todo\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-18T08:32:11.956Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+C:\GDV\CSharpCourse\src\Todo\Todo\bin\Debug\net9.0\Todo.exe
+C:\GDV\CSharpCourse\src\Todo\Todo\bin\Debug\net9.0\Todo.deps.json
+C:\GDV\CSharpCourse\src\Todo\Todo\bin\Debug\net9.0\Todo.runtimeconfig.json
+C:\GDV\CSharpCourse\src\Todo\Todo\bin\Debug\net9.0\Todo.dll
+C:\GDV\CSharpCourse\src\Todo\Todo\bin\Debug\net9.0\Todo.pdb
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\Todo.GeneratedMSBuildEditorConfig.editorconfig
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\Todo.AssemblyInfoInputs.cache
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\Todo.AssemblyInfo.cs
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\Todo.csproj.CoreCompileInputs.cache
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\Todo.sourcelink.json
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\Todo.dll
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\refint\Todo.dll
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\Todo.pdb
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\Todo.genruntimeconfig.cache
+C:\GDV\CSharpCourse\src\Todo\Todo\obj\Debug\net9.0\ref\Todo.dll
