@@ -1,26 +1,4 @@
-﻿// 주석 comment
-
-/*
- *  2026-11-18
- *  키워드 : namespace , internal , class, static, void, string 문법
- * 
- *  note : 키워드 문법에 따라서 결정된 이름 
- *  Program : 클래스. 
- *  Main( )  / WriteLine( )
- */
-
-/*
- *  게임에서 처음에 게임 제목 타이틀이 나오고 그 아래에 플레이가 가능한 플레이어 이름 만드는거 구현해보세요?
- *  
- *  제목 문자열
- *  
- *  <입출력>
- *  step1. 자연어 -> 프로그래밍 언어 바꾸고 -> 실행 가능한가?
- *  step2. 효율적인가? 왜 이런 이유로 선택했는지 근거를 말할 수 있는가? - 알고리즘
- *  
- *  [모험가 길드 ver] [1.00]
- *  
- */
+﻿using System.Security.Cryptography;
 
 namespace note
 {
@@ -28,23 +6,58 @@ namespace note
     {
         static void Main(string[] args)
         {
-            // 텍스트, 실수, 정수
-            // string 문자열     "..... " / "" 없으면 에러가 뜬다. -> 컨텍스트가 없음 이라고 뜬다.
-            // 변수 -> 타입을 정의했는대요
+            Console.WriteLine("C# 공부를 시작합니다");
+            Console.WriteLine("오늘의 목표: 직접 실행하기");
 
-            string title = "모험가 길드 ver";
-            float version = 1.01f;
+            Console.WriteLine("입문자");
+            Console.WriteLine("C# 배우기");
+
+            int health; // 선언
+            health = 100; // 첫 값 대입
+            health = 75; // 기존 값을 새 값으로 바꿈
+            // 오른쪽을 먼저 계산하고 그 결과를 왼쪽 변수에 저장
+            Console.WriteLine(health); // 변수의 값인 75 출력
+
+            int count = 10;
+            string label = "10";
+            Console.WriteLine(count + 5); // 숫자끼리 덧셈
+            Console.WriteLine(label + "5"); // 글자끼리 이어붙임
+
+            Console.WriteLine("health"); // health라는 글자 출력
+            Console.WriteLine($"현재 체력은 {health}입니다."); // 문자열 보간
+
+            int a = 1;
+            int b = 5;
+            Console.WriteLine(a); // 1
+            Console.WriteLine(b); // 5
+
+            Swap(ref a, ref b); // a와 b의 값을 서로 바꿈
+            // ref : 값만 복사하는 것이 아닌 실제 Main 의 a와 b의 값이 바뀜
+            Console.WriteLine(a); // 5
+            Console.WriteLine(b); // 1
             
-            int hp = 10 - 1;
+            Add(4, 10); // 14
 
-            // C# 콘솔에서 출력을 할것인데 타이틀 이름은 @@@ 이고 버전은 1.0으로 출력하는 코드
-            Console.WriteLine($"{title} {version}");
-            Console.WriteLine(title);  // 문자열 - string
-            Console.WriteLine(hp);       // 정수  - int
-            Console.WriteLine(1.1f); // 1 이 나온다. 1.0적었을때 실수가 안나오네? 어떻게 해야 실수를 표현할 수 있을까
-            Console.WriteLine(false);
+            var value = Add2(3, 5); // 8
 
-            Console.ReadLine(); // 여러분 작성한 것을 읽어오는 것.
+            Console.WriteLine(value);
+        }
+
+        static void Swap(ref int a, ref int b)
+        {
+            int temp = a; // temp에 a의 값 1을 저장
+            a = b; // a에 b의 값 5를 덮어씀
+            b = temp; // b에 temp인 a의 값 1을 넣음
+        }
+
+        static void Add(int a1, int a2) // void : 화면에 출력만 하고 끝냄
+        {
+            Console.WriteLine(a1 + a2);
+        }
+
+        static int Add2(int a1, int a2) // int + return : 계산 결과를 돌려줌
+        {
+            return a1 + a2; // swap과 다르게 return은 한번에 한개의 값만 돌려줌
         }
     }
 }
