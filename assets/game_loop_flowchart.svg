@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" width="900" height="540">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#dc2626"/>
+    </marker>
+    <clipPath id="clip-b1">
+      <rect x="140" y="36" width="320" height="54" rx="12"/>
+    </clipPath>
+    <clipPath id="clip-b2">
+      <rect x="140" y="128" width="320" height="54" rx="12"/>
+    </clipPath>
+    <clipPath id="clip-b3">
+      <rect x="140" y="220" width="320" height="54" rx="12"/>
+    </clipPath>
+    <clipPath id="clip-b4">
+      <rect x="140" y="330" width="320" height="54" rx="12"/>
+    </clipPath>
+    <clipPath id="clip-b5">
+      <rect x="140" y="426" width="320" height="54" rx="12"/>
+    </clipPath>
+    <clipPath id="clip-exit">
+      <rect x="570" y="220" width="270" height="54" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <!-- 배경 사각형 1개 -->
+  <rect x="0" y="0" width="900" height="540" fill="#f6f8fc"/>
+
+  <!-- B1: while (running) 검사 (amber) -->
+  <g id="B1">
+    <rect x="140" y="36" width="320" height="54" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="140" y="36" width="4" height="54" fill="#f59e0b" clip-path="url(#clip-b1)"/>
+    <text x="300" y="68" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#1e293b">while (running) 검사</text>
+  </g>
+
+  <!-- B2: ① Render — 화면 출력 (blue) -->
+  <g id="B2">
+    <rect x="140" y="128" width="320" height="54" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="140" y="128" width="4" height="54" fill="#3b82f6" clip-path="url(#clip-b2)"/>
+    <text x="300" y="160" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#1e293b">① Render — 화면 출력</text>
+  </g>
+
+  <!-- B3: ② 종료 조건 검사 (red) -->
+  <g id="B3">
+    <rect x="140" y="220" width="320" height="54" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="140" y="220" width="4" height="54" fill="#ef4444" clip-path="url(#clip-b3)"/>
+    <text x="300" y="252" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#1e293b">② 종료 조건 검사</text>
+  </g>
+
+  <!-- B4: ③ Input — 메뉴 입력 (purple) -->
+  <g id="B4">
+    <rect x="140" y="330" width="320" height="54" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="140" y="330" width="4" height="54" fill="#8b5cf6" clip-path="url(#clip-b4)"/>
+    <text x="300" y="362" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#1e293b">③ Input — 메뉴 입력</text>
+  </g>
+
+  <!-- B5: ④ Update — 조건문 분기 (green) -->
+  <g id="B5">
+    <rect x="140" y="426" width="320" height="54" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="140" y="426" width="4" height="54" fill="#10b981" clip-path="url(#clip-b5)"/>
+    <text x="300" y="458" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#1e293b">④ Update — 조건문 분기</text>
+  </g>
+
+  <!-- Exit: 승리/파산 메시지 출력 후 break (red) -->
+  <g id="Exit">
+    <rect x="570" y="220" width="270" height="54" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="570" y="220" width="4" height="54" fill="#ef4444" clip-path="url(#clip-exit)"/>
+    <text x="705" y="252" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#1e293b">승리/파산 메시지 출력 후 break</text>
+  </g>
+
+  <!-- 화살표 1: B1 -> B2 -->
+  <path d="M 300 90 L 300 124" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 화살표 2: B2 -> B3 -->
+  <path d="M 300 182 L 300 216" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 화살표 3: B3 -> B4 (계속) -->
+  <path d="M 300 274 L 300 326" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="312" y="305" font-family="sans-serif" font-size="13" font-weight="600" fill="#475569">계속</text>
+
+  <!-- 화살표 4: B3 -> Exit (승리/파산) -->
+  <path d="M 460 247 L 566 247" fill="none" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <text x="513" y="238" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#dc2626">승리/파산</text>
+
+  <!-- 화살표 5: B4 -> B5 -->
+  <path d="M 300 384 L 300 422" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 화살표 6: B5 -> B1 (다음 반복) -->
+  <path d="M 140 453 L 84 453 L 84 63 L 136 63" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="74" y="258" text-anchor="end" font-family="sans-serif" font-size="13" font-weight="600" fill="#475569">다음 반복</text>
+</svg>
