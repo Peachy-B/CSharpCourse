@@ -3,20 +3,12 @@
   "WorkspaceRootPath": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|c:\\gdv\\@csharpcourse\\src\\note\\note\\upgradeloop.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|solutionrelative:upgradeloop.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|c:\\gdv\\@csharpcourse\\src\\note\\note\\dinosourgame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|solutionrelative:dinosourgame.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|c:\\gdv\\@csharpcourse\\src\\note\\note\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|c:\\gdv\\@csharpcourse\\src\\note\\note\\\uBC18\uBCF5\uBB38.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|solutionrelative:\uBC18\uBCF5\uBB38.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|c:\\gdv\\@csharpcourse\\src\\note\\note\\name.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|solutionrelative:name.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|c:\\gdv\\@csharpcourse\\src\\note\\note\\dinomain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA4BBD0B-A27D-4788-983D-1FDB5461858C}|note.csproj|solutionrelative:dinomain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -31,53 +23,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "UpgradeLoop.cs",
-              "DocumentMoniker": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\UpgradeLoop.cs",
-              "RelativeDocumentMoniker": "UpgradeLoop.cs",
-              "ToolTip": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\UpgradeLoop.cs*",
-              "RelativeToolTip": "UpgradeLoop.cs*",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAaAAAAAAAAAA==",
+              "Title": "DinosourGame.cs",
+              "DocumentMoniker": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\DinosourGame.cs",
+              "RelativeDocumentMoniker": "DinosourGame.cs",
+              "ToolTip": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\DinosourGame.cs",
+              "RelativeToolTip": "DinosourGame.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD0AAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-20T08:45:58.073Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "\uBC18\uBCF5\uBB38.cs",
-              "DocumentMoniker": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\\uBC18\uBCF5\uBB38.cs",
-              "RelativeDocumentMoniker": "\uBC18\uBCF5\uBB38.cs",
-              "ToolTip": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\\uBC18\uBCF5\uBB38.cs",
-              "RelativeToolTip": "\uBC18\uBCF5\uBB38.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACsAAAAbAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-20T08:27:56.992Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Name.cs",
-              "DocumentMoniker": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\Name.cs",
-              "RelativeDocumentMoniker": "Name.cs",
-              "ToolTip": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\Name.cs",
-              "RelativeToolTip": "Name.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-20T08:11:04.518Z",
+              "WhenOpened": "2026-11-23T10:18:03.104Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAjAAAAAAAAAA==",
+              "Title": "DinoMain.cs",
+              "DocumentMoniker": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\DinoMain.cs",
+              "RelativeDocumentMoniker": "DinoMain.cs",
+              "ToolTip": "C:\\GDV\\@CSharpCourse\\src\\note\\note\\DinoMain.cs",
+              "RelativeToolTip": "DinoMain.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-18T09:35:55.684Z",
+              "WhenOpened": "2026-11-23T10:16:09.883Z",
               "EditorCaption": ""
             }
           ]
