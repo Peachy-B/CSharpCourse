@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="AvoidGame.cs" />
     <Compile Remove="Name.cs" />
     <Compile Remove="데이터의흐름제어.cs" />
     <Compile Remove="데이터의흐름제어_조건문.cs" />
