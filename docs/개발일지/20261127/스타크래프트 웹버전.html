@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StarCraft OOP Polymorphism Engine</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body {
+      background-color: #0b0e14;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      gap: 12px;
+    }
+    header {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #131822;
+      border: 1px solid #263042;
+      padding: 10px 16px;
+      border-radius: 6px;
+    }
+    header h1 {
+      font-size: 1.15rem;
+      color: #38bdf8;
+      letter-spacing: 0.5px;
+    }
+    .resources {
+      display: flex;
+      gap: 18px;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+    .res-mineral { color: #38bdf8; }
+    .res-gas { color: #4ade80; }
+    .main-container {
+      display: flex;
+      gap: 14px;
+      width: 100%;
+      max-width: 1100px;
+    }
+    canvas {
+      background: #141a12;
+      border: 2px solid #2e3b2b;
+      border-radius: 6px;
+      cursor: crosshair;
+      display: block;
+    }
+    .side-panel {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel-box {
+      background: #131822;
+      border: 1px solid #263042;
+      border-radius: 6px;
+      padding: 12px;
+    }
+    .panel-box h2 {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #263042;
+      padding-bottom: 6px;
+    }
+    .unit-info {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      min-height: 115px;
+    }
+    .tag {
+      display: inline-block;
+      background: #1e293b;
+      color: #7dd3fc;
+      border: 1px solid #334155;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin: 2px 2px 2px 0;
+      font-family: monospace;
+    }
+    .command-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    button {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #3b82f6;
+      padding: 9px 8px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.05s;
+    }
+    button:hover:not(:disabled) {
+      background: #2563eb;
+    }
+    button:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    button:disabled {
+      border-color: #334155;
+      color: #64748b;
+      cursor: not-allowed;
+      background: #0f172a;
+    }
+    .log-box {
+      font-family: monospace;
+      font-size: 0.78rem;
+      height: 165px;
+      overflow-y: auto;
+      background: #090d14;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #1e293b;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+    .log-entry { margin-bottom: 4px; }
+    .log-sys { color: #38bdf8; }
+    .log-warn { color: #fbbf24; }
+    .help-text {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>STARCRAFT OOP ENGINE (추상 클래스 & 다형성 시뮬레이터)</h1>
+    <div class="resources">
+      <span class="res-mineral">미네랄: <span id="mineralCount">50</span></span>
+      <span class="res-gas">베스핀 가스: <span id="gasCount">0</span></span>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <canvas id="gameCanvas" width="760" height="540"></canvas>
+
+    <div class="side-panel">
+      <div class="panel-box">
+        <h2>선택된 유닛 정보 (Unit & Interfaces)</h2>
+        <div id="unitInfo" class="unit-info">유닛을 좌클릭하여 선택하세요.</div>
+      </div>
+
+      <div class="panel-box">
+        <h2>명령 카드 (다형성 인터페이스 호출)</h2>
+        <div id="commandGrid" class="command-grid"></div>
+      </div>
+
+      <div class="panel-box">
+        <h2>조작 안내</h2>
+        <p class="help-text">
+          • <b>좌클릭</b>: 유닛 선택<br/>
+          • <b>우클릭</b>: 이동 / 자원 채취(일꾼) / 탑승(수송선)<br/>
+          • <b>단축키</b>: C(클로킹), B(버로우), G(채취), U(하차), S(정지)
+        </p>
+      </div>
+
+      <div class="panel-box">
+        <h2>실행 로그</h2>
+        <div id="logBox" class="log-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. 인터페이스 정의 (JavaScript 계약 기반 다형성 인터페이스)
+    // =========================================================================
+    const IClockable = {
+      name: "IClockable",
+      methods: ["cloak", "decloak", "toggleCloak"]
+    };
+
+    const IDetector = {
+      name: "IDetector",
+      methods: ["detect"]
+    };
+
+    const ITransport = {
+      name: "ITransport",
+      methods: ["loadUnit", "unloadAll"]
+    };
+
+    const Iworker = {
+      name: "Iworker",
+      methods: ["gather", "returnCargo"]
+    };
+
+    const IBurrowable = {
+      name: "IBurrowable",
+      methods: ["burrow", "unburrow", "toggleBurrow"]
+    };
+
+    // 런타임 인터페이스 구현 검증 및 확인 유틸리티
+    function implementInterfaces(instance, ...interfaces) {
+      instance._interfaces = new Set();
+      for (const iface of interfaces) {
+        for (const method of iface.methods) {
+          if (typeof instance[method] !== "function") {
+            throw new Error(
+              `${instance.constructor.name} 클래스는 ${iface.name}.${method}()를 구현해야 합니다.`
+            );
+          }
+        }
+        instance._interfaces.add(iface.name);
+      }
+    }
+
+    function hasInterface(obj, iface) {
+      return Boolean(obj && obj._interfaces && obj._interfaces.has(iface.name));
+    }
+
+    // =========================================================================
+    // 2. 추상 클래스: Unit (스타크래프트 유닛의 공통된 규칙만 정의)
+    // =========================================================================
+    class Unit {
+      constructor(name, race, x, y, maxHp, speed, radius, color) {
+        if (new.target === Unit) {
+          throw new Error("추상 클래스 Unit은 직접 인스턴스화할 수 없습니다.");
+        }
+        this.id = Unit._nextId++;
+        this.name = name;
+        this.race = race;
+        this.x = x;
+        this.y = y;
+        this.maxHp = maxHp;
+        this.hp = maxHp;
+        this.speed = speed;
+        this.radius = radius;
+        this.color = color;
+
+        this.targetX = x;
+        this.targetY = y;
+        this.state = "IDLE"; // IDLE, MOVING, GATHERING, RETURNING, BURROWED
+        this.isCloaked = false;
+        this.isBurrowed = false;
+        this.isDetected = false;
+        this.isBoarded = false;
+      }
+
+      // 공통 이동 명령 규칙
+      moveTo(x, y) {
+        if (!this.canMove()) {
+          logMessage(`[${this.name}] 현재 상태(${this.state})에서는 이동할 수 없습니다.`, "warn");
+          return false;
+        }
+        this.targetX = Math.max(25, Math.min(735, x));
+        this.targetY = Math.max(25, Math.min(515, y));
+        this.state = "MOVING";
+        return true;
+      }
+
+      stop() {
+        this.targetX = this.x;
+        this.targetY = this.y;
+        if (this.state !== "BURROWED") {
+          this.state = "IDLE";
+        }
+      }
+
+      canMove() {
+        return !this.isBurrowed && !this.isBoarded;
+      }
+
+      // 하위 클래스가 반드시 구현해야 하는 추상 메서드 (다형성 핵심)
+      update(dt, world) {
+        throw new Error("하위 클래스에서 update(dt, world)를 오버라이딩해야 합니다.");
+      }
+
+      render(ctx, isSelected) {
+        throw new Error("하위 클래스에서 render(ctx, isSelected)를 오버라이딩해야 합니다.");
+      }
+
+      // 공통 위치 이동 보간 헬퍼
+      stepMovement(dt) {
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 2) {
+          const step = Math.min(dist, this.speed * dt);
+          this.x += (dx / dist) * step;
+          this.y += (dy / dist) * step;
+          return false; // 이동 중
+        }
+        this.x = this.targetX;
+        this.y = this.targetY;
+        return true; // 도착 완료
+      }
+
+      // 공통 HUD / 선택 원 / 체력바 렌더링 규칙
+      drawBaseFrame(ctx, isSelected, shapeDrawer) {
+        if (this.isBoarded) return;
+
+        ctx.save();
+        // 클로킹 및 버로우 투명도 표현 (디텍터 탐지 시 반투명 윤곽)
+        if (this.isCloaked || this.isBurrowed) {
+          ctx.globalAlpha = this.isDetected ? 0.55 : 0.28;
+        }
+
+        // 선택 링
+        if (isSelected) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius + 7, 0, Math.PI * 2);
+          ctx.strokeStyle = "#22c55e";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // 디텍터 감지 표시
+        if ((this.isCloaked || this.isBurrowed) && this.isDetected) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius + 11, 0, Math.PI * 2);
+          ctx.setLineDash([4, 3]);
+          ctx.strokeStyle = "#f43f5e";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // 유닛 외형 그리기 (다형적 콜백)
+        shapeDrawer(ctx);
+
+        ctx.globalAlpha = 1.0;
+
+        // 이름 및 상태 라벨
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(this.name, this.x, this.y - this.radius - 10);
+
+        // 체력바
+        const barW = 34;
+        const barH = 4;
+        const hpRatio = this.hp / this.maxHp;
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(this.x - barW / 2, this.y + this.radius + 6, barW, barH);
+        ctx.fillStyle = hpRatio > 0.5 ? "#22c55e" : "#ef4444";
+        ctx.fillRect(this.x - barW / 2, this.y + this.radius + 6, barW * hpRatio, barH);
+
+        ctx.restore();
+      }
+    }
+    Unit._nextId = 1;
+
+    // =========================================================================
+    // 3. 실제 스타크래프트 1 유닛 구현 클래스들
+    // =========================================================================
+
+    // [테란] SCV : Iworker 구현
+    class SCV extends Unit {
+      constructor(x, y) {
+        super("SCV", "Terran", x, y, 60, 115, 14, "#3b82f6");
+        this.cargo = 0;
+        this.gatherTimer = 0;
+        this.targetNode = null;
+        implementInterfaces(this, Iworker);
+      }
+
+      gather(node) {
+        if (!node) return;
+        this.targetNode = node;
+        this.targetX = node.x;
+        this.targetY = node.y;
+        this.state = "GATHERING";
+        logMessage(`[SCV] 미네랄 필드(#${node.id})로 채취 이동합니다.`);
+      }
+
+      returnCargo(commandCenter) {
+        this.targetX = commandCenter.x;
+        this.targetY = commandCenter.y;
+        this.state = "RETURNING";
+      }
+
+      update(dt, world) {
+        if (this.isBoarded) return;
+
+        if (this.state === "MOVING") {
+          if (this.stepMovement(dt)) this.state = "IDLE";
+        } else if (this.state === "GATHERING" && this.targetNode) {
+          if (this.stepMovement(dt)) {
+            this.gatherTimer += dt;
+            if (this.gatherTimer >= 1.2) {
+              this.gatherTimer = 0;
+              this.cargo = 8;
+              logMessage(`[SCV] 미네랄 8 채취 완료! 사령부로 귀환합니다.`);
+              this.returnCargo(world.commandCenter);
+            }
+          }
+        } else if (this.state === "RETURNING") {
+          if (this.stepMovement(dt)) {
+            world.minerals += this.cargo;
+            logMessage(`[SCV] 미네랄 +${this.cargo} 반납 완료! (보유: ${world.minerals})`, "sys");
+            this.cargo = 0;
+            if (this.targetNode) {
+              this.targetX = this.targetNode.x;
+              this.targetY = this.targetNode.y;
+              this.state = "GATHERING";
+            } else {
+              this.state = "IDLE";
+            }
+          }
+        }
+      }
+
+      render(ctx, isSelected) {
+        this.drawBaseFrame(ctx, isSelected, (c) => {
+          c.fillStyle = this.color;
+          c.fillRect(this.x - 11, this.y - 11, 22, 22);
+          c.strokeStyle = "#93c5fd";
+          c.lineWidth = 2;
+          c.strokeRect(this.x - 11, this.y - 11, 22, 22);
+
+          // 미네랄 덩어리 보유 표시
+          if (this.cargo > 0) {
+            c.fillStyle = "#38bdf8";
+            c.beginPath();
+            c.arc(this.x + 10, this.y - 8, 5, 0, Math.PI * 2);
+            c.fill();
+          }
+        });
+      }
+    }
+
+    // [테란] Wraith (레이스) : IClockable 구현
+    class Wraith extends Unit {
+      constructor(x, y) {
+        super("Wraith", "Terran", x, y, 120, 165, 15, "#60a5fa");
+        this.energy = 100;
+        this.maxEnergy = 200;
+        implementInterfaces(this, IClockable);
+      }
+
+      cloak() {
+        if (this.isCloaked) return;
+        if (this.energy < 25) {
+          logMessage(`[Wraith] 에너지가 부족하여 클로킹할 수 없습니다.`, "warn");
+          return;
+        }
+        this.energy -= 25;
+        this.isCloaked = true;
+        logMessage(`[Wraith] 클로킹 가동! (잔여 에너지: ${Math.floor(this.energy)})`, "sys");
+      }
+
+      decloak() {
+        if (!this.isCloaked) return;
+        this.isCloaked = false;
+        logMessage(`[Wraith] 클로킹을 해제했습니다.`);
+      }
+
+      toggleCloak() {
+        this.isCloaked ? this.decloak() : this.cloak();
+      }
+
+      update(dt, world) {
+        if (this.isBoarded) return;
+
+        if (this.isCloaked) {
+          this.energy -= 5 * dt;
+          if (this.energy <= 0) {
+            this.energy = 0;
+            this.decloak();
+            logMessage(`[Wraith] 에너지 고갈로 클로킹이 풀렸습니다.`, "warn");
+          }
+        } else {
+          this.energy = Math.min(this.maxEnergy, this.energy + 3 * dt);
+        }
+
+        if (this.state === "MOVING") {
+          if (this.stepMovement(dt)) this.state = "IDLE";
+        }
+      }
+
+      render(ctx, isSelected) {
+        this.drawBaseFrame(ctx, isSelected, (c) => {
+          c.fillStyle = this.color;
+          c.beginPath();
+          c.moveTo(this.x, this.y - 16);
+          c.lineTo(this.x + 14, this.y + 12);
+          c.lineTo(this.x, this.y + 6);
+          c.lineTo(this.x - 14, this.y + 12);
+          c.closePath();
+          c.fill();
+          c.strokeStyle = "#dbeafe";
+          c.lineWidth = 1.5;
+          c.stroke();
+        });
+      }
+    }
+
+    // [테란] Dropship (드랍쉽) : ITransport 구현
+    class Dropship extends Unit {
+      constructor(x, y) {
+        super("Dropship", "Terran", x, y, 150, 140, 18, "#0284c7");
+        this.capacity = 4;
+        this.passengers = [];
+        implementInterfaces(this, ITransport);
+      }
+
+      loadUnit(unit) {
+        if (unit === this) return false;
+        if (unit.isBoarded) return false;
+        if (unit instanceof Dropship || unit instanceof Wraith || unit instanceof Overlord || unit instanceof Observer) {
+          logMessage(`[Dropship] 공중 유닛(${unit.name})은 탑승시킬 수 없습니다.`, "warn");
+          return false;
+        }
+        if (unit.isBurrowed) {
+          logMessage(`[Dropship] 버로우 상태인 ${unit.name}은(는) 탑승할 수 없습니다.`, "warn");
+          return false;
+        }
+        if (this.passengers.length >= this.capacity) {
+          logMessage(`[Dropship] 수송 공간이 가득 찼습니다 (${this.capacity}/${this.capacity}).`, "warn");
+          return false;
+        }
+        unit.stop();
+        unit.isBoarded = true;
+        this.passengers.push(unit);
+        logMessage(`[Dropship] ${unit.name} 탑승 완료 (${this.passengers.length}/${this.capacity})`, "sys");
+        return true;
+      }
+
+      unloadAll() {
+        if (this.passengers.length === 0) {
+          logMessage(`[Dropship] 하차시킬 유닛이 없습니다.`, "warn");
+          return;
+        }
+        const count = this.passengers.length;
+        this.passengers.forEach((u, idx) => {
+          const angle = (Math.PI * 2 * idx) / count;
+          u.isBoarded = false;
+          u.x = this.x + Math.cos(angle) * 32;
+          u.y = this.y + Math.sin(angle) * 32;
+          u.targetX = u.x;
+          u.targetY = u.y;
+          u.state = "IDLE";
+        });
+        logMessage(`[Dropship] 유닛 ${count}기 전원 하차 완료!`, "sys");
+        this.passengers = [];
+      }
+
+      update(dt, world) {
+        if (this.state === "MOVING") {
+          if (this.stepMovement(dt)) this.state = "IDLE";
+        }
+      }
+
+      render(ctx, isSelected) {
+        this.drawBaseFrame(ctx, isSelected, (c) => {
+          c.fillStyle = this.color;
+          c.beginPath();
+          c.roundRect(this.x - 16, this.y - 11, 32, 22, 6);
+          c.fill();
+          c.strokeStyle = "#7dd3fc";
+          c.lineWidth = 2;
+          c.stroke();
+
+          // 탑승 슬롯 인디케이터
+          for (let i = 0; i < this.capacity; i++) {
+            c.fillStyle = i < this.passengers.length ? "#facc15" : "#0f172a";
+            c.fillRect(this.x - 11 + i * 6, this.y - 3, 4, 6);
+          }
+        });
+      }
+    }
+
+    // [저그] Hydralisk (히드라리스크) : IBurrowable 구현
+    class Hydralisk extends Unit {
+      constructor(x, y) {
+        super("Hydralisk", "Zerg", x, y, 80, 120, 14, "#a855f7");
+        implementInterfaces(this, IBurrowable);
+      }
+
+      burrow() {
+        if (this.isBurrowed) return;
+        this.stop();
+        this.isBurrowed = true;
+        this.state = "BURROWED";
+        logMessage(`[Hydralisk] 땅속으로 버로우(잠복)했습니다.`, "sys");
+      }
+
+      unburrow() {
+        if (!this.isBurrowed) return;
+        this.isBurrowed = false;
+        this.state = "IDLE";
+        logMessage(`[Hydralisk] 언버로우하여 지상으로 복귀했습니다.`);
+      }
+
+      toggleBurrow() {
+        this.isBurrowed ? this.unburrow() : this.burrow();
+      }
+
+      update(dt, world) {
+        if (this.isBoarded) return;
+        if (this.state === "MOVING") {
+          if (this.stepMovement(dt)) this.state = "IDLE";
+        }
+      }
+
+      render(ctx, isSelected) {
+        this.drawBaseFrame(ctx, isSelected, (c) => {
+          if (this.isBurrowed) {
+            c.fillStyle = "#581c87";
+            c.beginPath();
+            c.ellipse(this.x, this.y + 4, 14, 7, 0, 0, Math.PI * 2);
+            c.fill();
+            c.strokeStyle = "#d8b4fe";
+            c.stroke();
+          } else {
+            c.fillStyle = this.color;
+            c.beginPath();
+            c.arc(this.x, this.y, 13, 0, Math.PI * 2);
+            c.fill();
+            c.strokeStyle = "#f3e8ff";
+            c.lineWidth = 2;
+            c.stroke();
+          }
+        });
+      }
+    }
+
+    // [저그] Overlord (오버로드) : IDetector, ITransport 다중 인터페이스 구현
+    class Overlord extends Unit {
+      constructor(x, y) {
+        super("Overlord", "Zerg", x, y, 200, 85, 20, "#9333ea");
+        this.detectRadius = 155;
+        this.capacity = 4;
+        this.passengers = [];
+        implementInterfaces(this, IDetector, ITransport);
+      }
+
+      detect(units) {
+        const found = [];
+        for (const u of units) {
+          if (u === this || u.isBoarded) continue;
+          if ((u.isCloaked || u.isBurrowed) && Math.hypot(u.x - this.x, u.y - this.y) <= this.detectRadius) {
+            u.isDetected = true;
+            found.push(u);
+          }
+        }
+        return found;
+      }
+
+      loadUnit(unit) {
+        if (unit === this || unit.isBoarded) return false;
+        if (unit instanceof Dropship || unit instanceof Wraith || unit instanceof Overlord || unit instanceof Observer) {
+          logMessage(`[Overlord] 공중 유닛(${unit.name})은 수송할 수 없습니다.`, "warn");
+          return false;
+        }
+        if (unit.isBurrowed) {
+          logMessage(`[Overlord] 버로우 상태인 ${unit.name}은(는) 수송할 수 없습니다.`, "warn");
+          return false;
+        }
+        if (this.passengers.length >= this.capacity) {
+          logMessage(`[Overlord] 수송 한도(${this.capacity}기) 초과입니다.`, "warn");
+          return false;
+        }
+        unit.stop();
+        unit.isBoarded = true;
+        this.passengers.push(unit);
+        logMessage(`[Overlord] ${unit.name} 수송 완료 (${this.passengers.length}/${this.capacity})`, "sys");
+        return true;
+      }
+
+      unloadAll() {
+        if (this.passengers.length === 0) {
+          logMessage(`[Overlord] 하차할 유닛이 없습니다.`, "warn");
+          return;
+        }
+        const count = this.passengers.length;
+        this.passengers.forEach((u, idx) => {
+          const angle = (Math.PI * 2 * idx) / count;
+          u.isBoarded = false;
+          u.x = this.x + Math.cos(angle) * 34;
+          u.y = this.y + Math.sin(angle) * 34;
+          u.targetX = u.x;
+          u.targetY = u.y;
+          u.state = "IDLE";
+        });
+        logMessage(`[Overlord] 수송 유닛 ${count}기 하차 완료!`, "sys");
+        this.passengers = [];
+      }
+
+      update(dt, world) {
+        this.detect(world.units);
+        if (this.state === "MOVING") {
+          if (this.stepMovement(dt)) this.state = "IDLE";
+        }
+      }
+
+      render(ctx, isSelected) {
+        this.drawBaseFrame(ctx, isSelected, (c) => {
+          // 디텍터 탐지 반경 표시
+          c.beginPath();
+          c.arc(this.x, this.y, this.detectRadius, 0, Math.PI * 2);
+          c.fillStyle = "rgba(168, 85, 247, 0.05)";
+          c.fill();
+          c.strokeStyle = "rgba(192, 132, 252, 0.25)";
+          c.setLineDash([5, 5]);
+          c.stroke();
+          c.setLineDash([]);
+
+          c.fillStyle = this.color;
+          c.beginPath();
+          c.ellipse(this.x, this.y, 19, 14, 0, 0, Math.PI * 2);
+          c.fill();
+          c.strokeStyle = "#f3e8ff";
+          c.lineWidth = 2;
+          c.stroke();
+
+          // 탑승 슬롯 표시
+          for (let i = 0; i < this.capacity; i++) {
+            c.fillStyle = i < this.passengers.length ? "#facc15" : "#2e1065";
+            c.fillRect(this.x - 11 + i * 6, this.y - 2, 4, 5);
+          }
+        });
+      }
+    }
+
+    // [프로토스] Observer (옵저버) : IClockable, IDetector 다중 인터페이스 구현
+    class Observer extends Unit {
+      constructor(x, y) {
+        super("Observer", "Protoss", x, y, 40, 110, 12, "#eab308");
+        this.detectRadius = 145;
+        this.isCloaked = true; // 프로토스 옵저버는 영구 클로킹 기본 보유
+        implementInterfaces(this, IClockable, IDetector);
+      }
+
+      cloak() {
+        this.isCloaked = true;
+        logMessage(`[Observer] 영구 은폐 필드가 활성화되었습니다.`, "sys");
+      }
+
+      decloak() {
+        this.isCloaked = false;
+        logMessage(`[Observer] 은폐 필드를 수동 해제했습니다.`);
+      }
+
+      toggleCloak() {
+        this.isCloaked ? this.decloak() : this.cloak();
+      }
+
+      detect(units) {
+        const found = [];
+        for (const u of units) {
+          if (u === this || u.isBoarded) continue;
+          if ((u.isCloaked || u.isBurrowed) && Math.hypot(u.x - this.x, u.y - this.y) <= this.detectRadius) {
+            u.isDetected = true;
+            found.push(u);
+          }
+        }
+        return found;
+      }
+
+      update(dt, world) {
+        this.detect(world.units);
+        if (this.state === "MOVING") {
+          if (this.stepMovement(dt)) this.state = "IDLE";
+        }
+      }
+
+      render(ctx, isSelected) {
+        this.drawBaseFrame(ctx, isSelected, (c) => {
+          // 디텍터 탐지 반경
+          c.beginPath();
+          c.arc(this.x, this.y, this.detectRadius, 0, Math.PI * 2);
+          c.fillStyle = "rgba(234, 179, 8, 0.05)";
+          c.fill();
+          c.strokeStyle = "rgba(250, 204, 21, 0.28)";
+          c.setLineDash([4, 4]);
+          c.stroke();
+          c.setLineDash([]);
+
+          c.fillStyle = this.color;
+          c.beginPath();
+          c.arc(this.x, this.y, 11, 0, Math.PI * 2);
+          c.fill();
+          c.fillStyle = "#38bdf8";
+          c.beginPath();
+          c.arc(this.x, this.y, 4, 0, Math.PI * 2);
+          c.fill();
+        });
+      }
+    }
+
+    // [프로토스] Dark Templar (다크 템플러) : IClockable 구현
+    class DarkTemplar extends Unit {
+      constructor(x, y) {
+        super("Dark Templar", "Protoss", x, y, 80, 145, 14, "#f59e0b");
+        this.isCloaked = true; // 영구 클로킹
+        implementInterfaces(this, IClockable);
+      }
+
+      cloak() {
+        this.isCloaked = true;
+        logMessage(`[Dark Templar] 그림자 은폐 상태입니다.`, "sys");
+      }
+
+      decloak() {
+        this.isCloaked = false;
+        logMessage(`[Dark Templar] 모습을 드러냈습니다.`);
+      }
+
+      toggleCloak() {
+        this.isCloaked ? this.decloak() : this.cloak();
+      }
+
+      update(dt, world) {
+        if (this.isBoarded) return;
+        if (this.state === "MOVING") {
+          if (this.stepMovement(dt)) this.state = "IDLE";
+        }
+      }
+
+      render(ctx, isSelected) {
+        this.drawBaseFrame(ctx, isSelected, (c) => {
+          c.fillStyle = this.color;
+          c.beginPath();
+          c.moveTo(this.x, this.y - 14);
+          c.lineTo(this.x + 12, this.y);
+          c.lineTo(this.x, this.y + 14);
+          c.lineTo(this.x - 12, this.y);
+          c.closePath();
+          c.fill();
+
+          // 사이오닉 검 표현
+          c.strokeStyle = "#34d399";
+          c.lineWidth = 2.5;
+          c.beginPath();
+          c.moveTo(this.x + 8, this.y - 4);
+          c.lineTo(this.x + 19, this.y - 12);
+          c.stroke();
+        });
+      }
+    }
+
+    // =========================================================================
+    // 4. 월드 객체 및 게임 루프 (입력 -> 갱신 -> 렌더링)
+    // =========================================================================
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const unitInfoEl = document.getElementById("unitInfo");
+    const commandGridEl = document.getElementById("commandGrid");
+    const logBoxEl = document.getElementById("logBox");
+    const mineralCountEl = document.getElementById("mineralCount");
+
+    function logMessage(msg, type = "") {
+      const div = document.createElement("div");
+      div.className = "log-entry " + (type === "sys" ? "log-sys" : type === "warn" ? "log-warn" : "");
+      div.textContent = `> ${msg}`;
+      logBoxEl.appendChild(div);
+      logBoxEl.scrollTop = logBoxEl.scrollHeight;
+    }
+
+    const world = {
+      minerals: 50,
+      gas: 0,
+      commandCenter: { x: 110, y: 270, radius: 34 },
+      mineralNodes: [
+        { id: 1, x: 55, y: 95, radius: 18 },
+        { id: 2, x: 95, y: 75, radius: 18 },
+        { id: 3, x: 140, y: 70, radius: 18 }
+      ],
+      units: [
+        new SCV(180, 230),
+        new Wraith(280, 150),
+        new Dropship(260, 320),
+        new Hydralisk(380, 360),
+        new Overlord(520, 200),
+        new Observer(580, 360),
+        new DarkTemplar(450, 280)
+      ],
+      selectedUnit: null,
+      clickMarkers: []
+    };
+
+    world.selectedUnit = world.units[0];
+
+    // -------------------------------------------------------------------------
+    // [입력 처리 (Input)] 마우스 및 키보드
+    // -------------------------------------------------------------------------
+    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    canvas.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      // 좌클릭: 유닛 선택
+      if (e.button === 0) {
+        let clicked = null;
+        for (let i = world.units.length - 1; i >= 0; i--) {
+          const u = world.units[i];
+          if (u.isBoarded) continue;
+          if (Math.hypot(u.x - mx, u.y - my) <= u.radius + 6) {
+            clicked = u;
+            break;
+          }
+        }
+        if (clicked) {
+          world.selectedUnit = clicked;
+          updateUI();
+        }
+      }
+
+      // 우클릭: 다형적 인터페이스를 활용한 스마트 명령
+      if (e.button === 2 && world.selectedUnit) {
+        const unit = world.selectedUnit;
+        world.clickMarkers.push({ x: mx, y: my, alpha: 1.0 });
+
+        // 1) Iworker 구현체일 경우 미네랄 우클릭 시 자동 채취
+        if (hasInterface(unit, Iworker)) {
+          const hitNode = world.mineralNodes.find(
+            (n) => Math.hypot(n.x - mx, n.y - my) <= n.radius + 10
+          );
+          if (hitNode) {
+            unit.gather(hitNode);
+            updateUI();
+            return;
+          }
+        }
+
+        // 2) ITransport 구현체일 경우 지상 유닛 우클릭 시 탑승 처리
+        if (hasInterface(unit, ITransport)) {
+          const targetUnit = world.units.find(
+            (u) => u !== unit && !u.isBoarded && Math.hypot(u.x - mx, u.y - my) <= u.radius + 8
+          );
+          if (targetUnit) {
+            if (Math.hypot(unit.x - targetUnit.x, unit.y - targetUnit.y) <= 55) {
+              unit.loadUnit(targetUnit);
+            } else {
+              unit.moveTo(targetUnit.x, targetUnit.y);
+              logMessage(`[${unit.name}] ${targetUnit.name} 근처로 이동 후 우클릭하면 탑승합니다.`);
+            }
+            updateUI();
+            return;
+          }
+        }
+
+        // 3) 공통 Unit 이동 규칙 호출
+        unit.moveTo(mx, my);
+        updateUI();
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      const unit = world.selectedUnit;
+      if (!unit) return;
+      const key = e.key.toLowerCase();
+
+      if (key === "s") {
+        unit.stop();
+        logMessage(`[${unit.name}] 정지 명령 수행.`);
+      } else if (key === "c" && hasInterface(unit, IClockable)) {
+        unit.toggleCloak();
+      } else if (key === "b" && hasInterface(unit, IBurrowable)) {
+        unit.toggleBurrow();
+      } else if (key === "g" && hasInterface(unit, Iworker)) {
+        unit.gather(world.mineralNodes[0]);
+      } else if (key === "u" && hasInterface(unit, ITransport)) {
+        unit.unloadAll();
+      }
+      updateUI();
+    });
+
+    // -------------------------------------------------------------------------
+    // UI 갱신 (선택된 유닛의 구현 인터페이스에 따른 동적 버튼 생성)
+    // -------------------------------------------------------------------------
+    function updateUI() {
+      mineralCountEl.textContent = world.minerals;
+      const u = world.selectedUnit;
+      if (!u) return;
+
+      const ifaceTags = Array.from(u._interfaces)
+        .map((name) => `<span class="tag">${name}</span>`)
+        .join("");
+
+      let extraInfo = "";
+      if (typeof u.energy === "number") {
+        extraInfo += `<div>에너지: ${Math.floor(u.energy)} / ${u.maxEnergy}</div>`;
+      }
+      if (hasInterface(u, ITransport)) {
+        const names = u.passengers.map((p) => p.name).join(", ") || "없음";
+        extraInfo += `<div>탑승 유닛 (${u.passengers.length}/${u.capacity}): ${names}</div>`;
+      }
+      if (hasInterface(u, Iworker)) {
+        extraInfo += `<div>운반 자원: 미네랄 ${u.cargo}</div>`;
+      }
+
+      unitInfoEl.innerHTML = `
+        <div><b>${u.name}</b> (${u.race}) | HP: ${u.hp}/${u.maxHp}</div>
+        <div>상태: <b>${u.state}</b> ${u.isCloaked ? "(은폐됨)" : ""} ${u.isDetected ? "[감지됨!]" : ""}</div>
+        ${extraInfo}
+        <div style="margin-top:6px;">구현 인터페이스:<br/>${ifaceTags}</div>
+      `;
+
+      // 다형적 인터페이스 검사 기반 명령 버튼 동적 바인딩
+      commandGridEl.innerHTML = "";
+
+      const addBtn = (label, onClick) => {
+        const btn = document.createElement("button");
+        btn.textContent = label;
+        btn.onclick = () => {
+          onClick();
+          updateUI();
+        };
+        commandGridEl.appendChild(btn);
+      };
+
+      addBtn("정지 (S)", () => {
+        u.stop();
+        logMessage(`[${u.name}] 정지`);
+      });
+
+      if (hasInterface(u, IClockable)) {
+        addBtn(u.isCloaked ? "클로킹 해제 (C)" : "클로킹 (C)", () => u.toggleCloak());
+      }
+
+      if (hasInterface(u, IBurrowable)) {
+        addBtn(u.isBurrowed ? "언버로우 (B)" : "버로우 (B)", () => u.toggleBurrow());
+      }
+
+      if (hasInterface(u, Iworker)) {
+        addBtn("미네랄 채취 (G)", () => u.gather(world.mineralNodes[0]));
+      }
+
+      if (hasInterface(u, ITransport)) {
+        addBtn("주변 유닛 탑승", () => {
+          const nearby = world.units.find(
+            (other) =>
+              other !== u &&
+              !other.isBoarded &&
+              Math.hypot(other.x - u.x, other.y - u.y) <= 75
+          );
+          if (nearby) {
+            u.loadUnit(nearby);
+          } else {
+            logMessage(`[${u.name}] 반경 75px 이내에 탑승 가능한 지상 유닛이 없습니다.`, "warn");
+          }
+        });
+        addBtn("전원 하차 (U)", () => u.unloadAll());
+      }
+
+      if (hasInterface(u, IDetector)) {
+        addBtn("주변 탐지 스캔", () => {
+          const detected = u.detect(world.units);
+          if (detected.length > 0) {
+            logMessage(
+              `[${u.name}] 은폐/잠복 유닛 탐지: ${detected.map((d) => d.name).join(", ")}`,
+              "sys"
+            );
+          } else {
+            logMessage(`[${u.name}] 탐지 반경 내 은폐/잠복 유닛이 없습니다.`);
+          }
+        });
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // [갱신 처리 (Update)] 모든 유닛에 동일한 다형성 인터페이스 update() 호출
+    // -------------------------------------------------------------------------
+    function updateWorld(dt) {
+      // 매 프레임 탐지 상태 초기화 후 IDetector 구현체들이 갱신
+      for (const u of world.units) {
+        u.isDetected = false;
+      }
+
+      for (const u of world.units) {
+        u.update(dt, world);
+      }
+
+      for (let i = world.clickMarkers.length - 1; i >= 0; i--) {
+        world.clickMarkers[i].alpha -= dt * 2.2;
+        if (world.clickMarkers[i].alpha <= 0) {
+          world.clickMarkers.splice(i, 1);
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // [렌더링 처리 (Render)] 지형, 건물 및 다형성 유닛 render() 호출
+    // -------------------------------------------------------------------------
+    function renderWorld() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 배경 그리드
+      ctx.strokeStyle = "#1c2419";
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // 커맨드 센터 (자원 반납처)
+      const cc = world.commandCenter;
+      ctx.fillStyle = "#1e3a8a";
+      ctx.beginPath();
+      ctx.arc(cc.x, cc.y, cc.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#60a5fa";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "bold 11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Command Center", cc.x, cc.y + 4);
+
+      // 미네랄 노드
+      for (const node of world.mineralNodes) {
+        ctx.fillStyle = "#0ea5e9";
+        ctx.beginPath();
+        ctx.moveTo(node.x, node.y - 16);
+        ctx.lineTo(node.x + 15, node.y - 4);
+        ctx.lineTo(node.x + 10, node.y + 14);
+        ctx.lineTo(node.x - 10, node.y + 14);
+        ctx.lineTo(node.x - 15, node.y - 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#bae6fd";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // 우클릭 이동 마커
+      for (const m of world.clickMarkers) {
+        ctx.strokeStyle = `rgba(34, 197, 94, ${m.alpha})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, (1 - m.alpha) * 18 + 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // 모든 유닛 다형적 렌더링
+      for (const u of world.units) {
+        u.render(ctx, u === world.selectedUnit);
+      }
+    }
+
+    // 메인 애니메이션 루프
+    let lastTime = performance.now();
+    let uiSyncTimer = 0;
+
+    function gameLoop(now) {
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+
+      updateWorld(dt);
+      renderWorld();
+
+      uiSyncTimer += dt;
+      if (uiSyncTimer >= 0.2) {
+        uiSyncTimer = 0;
+        updateUI();
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    logMessage("스타크래프트 1 OOP 다형성 엔진 초기화 완료.", "sys");
+    logMessage("유닛을 클릭하고 인터페이스별 고유 능력을 테스트하세요.");
+    updateUI();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>

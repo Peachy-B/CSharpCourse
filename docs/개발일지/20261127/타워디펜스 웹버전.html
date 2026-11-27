@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OOP 타워 디펜스 - 다형성 &amp; ISelectable 구현</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    background: #141824;
+    color: #e6e9f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    min-height: 100vh;
+  }
+  header {
+    width: 1040px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e2436;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 1px solid #2e3752;
+    margin-bottom: 12px;
+  }
+  header h1 { font-size: 18px; color: #7aa2f7; }
+  .stats { display: flex; gap: 20px; font-size: 15px; font-weight: bold; }
+  .stat-gold { color: #f6c177; }
+  .stat-life { color: #eb6f92; }
+  .stat-wave { color: #9ccfd8; }
+
+  .main-wrap {
+    display: flex;
+    gap: 14px;
+    width: 1040px;
+  }
+  .canvas-box {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #2e3752;
+    background: #1a2030;
+  }
+  canvas { display: block; cursor: crosshair; }
+
+  .sidebar {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .panel {
+    background: #1e2436;
+    border: 1px solid #2e3752;
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .panel h2 {
+    font-size: 14px;
+    color: #bb9af7;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #2e3752;
+    padding-bottom: 6px;
+  }
+  .tower-btn {
+    width: 100%;
+    text-align: left;
+    background: #262e45;
+    border: 1px solid #3b4668;
+    color: #e6e9f0;
+    padding: 9px 10px;
+    border-radius: 7px;
+    margin-bottom: 7px;
+    cursor: pointer;
+    transition: 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tower-btn:hover { background: #303a57; }
+  .tower-btn.active {
+    border-color: #7aa2f7;
+    background: #2c3859;
+    box-shadow: 0 0 0 1px #7aa2f7;
+  }
+  .tower-btn .t-name { font-weight: bold; font-size: 13px; }
+  .tower-btn .t-desc { font-size: 11px; color: #9aa5ce; display: block; margin-top: 2px; }
+  .tower-btn .t-cost { font-weight: bold; color: #f6c177; font-size: 13px; }
+
+  .ctrl-row { display: flex; gap: 8px; }
+  .action-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 7px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+    color: #141824;
+    background: #9ece6a;
+  }
+  .action-btn:hover { opacity: 0.9; }
+  .action-btn.secondary { background: #7aa2f7; }
+
+  .info-box {
+    min-height: 155px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #c0caf5;
+  }
+  .info-title { font-size: 15px; font-weight: bold; color: #7dcfff; margin-bottom: 6px; }
+  .info-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #2e3752;
+    color: #bb9af7;
+    margin-bottom: 6px;
+  }
+  .legend { font-size: 11px; color: #9aa5ce; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>OOP 타워 디펜스 (추상 클래스 · 다형성 · ISelectable)</h1>
+  <div class="stats">
+    <span class="stat-gold" id="uiGold">골드: 350G</span>
+    <span class="stat-life" id="uiLife">생명력: 20</span>
+    <span class="stat-wave" id="uiWave">웨이브: 0</span>
+  </div>
+</header>
+
+<div class="main-wrap">
+  <div class="canvas-box">
+    <canvas id="gameCanvas" width="740" height="520"></canvas>
+  </div>
+
+  <div class="sidebar">
+    <div class="panel">
+      <h2>1. 타워 건설 (맵 빈칸 클릭)</h2>
+      <button class="tower-btn active" data-type="arrow">
+        <div>
+          <span class="t-name">🏹 화살 타워</span>
+          <span class="t-desc">단일 타겟 · 빠른 연사</span>
+        </div>
+        <span class="t-cost">50G</span>
+      </button>
+      <button class="tower-btn" data-type="cannon">
+        <div>
+          <span class="t-name">💣 대포 타워</span>
+          <span class="t-desc">범위 폭발 · 비행 적 타격 불가</span>
+        </div>
+        <span class="t-cost">80G</span>
+      </button>
+      <button class="tower-btn" data-type="ice">
+        <div>
+          <span class="t-name">❄️ 얼음 타워</span>
+          <span class="t-desc">범위 감속 · 보스 면역</span>
+        </div>
+        <span class="t-cost">70G</span>
+      </button>
+      <button class="tower-btn" data-type="support">
+        <div>
+          <span class="t-name">✨ 지원 타워</span>
+          <span class="t-desc">공격 없음 · 주변 타워 강화</span>
+        </div>
+        <span class="t-cost">90G</span>
+      </button>
+      <div class="ctrl-row" style="margin-top:6px;">
+        <button class="action-btn" id="btnNextWave">다음 웨이브 시작</button>
+        <button class="action-btn secondary" id="btnCancelBuild">선택 해제</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>2. ISelectable 선택 정보</h2>
+      <div class="info-box" id="selectionPanel">
+        타워 또는 적을 클릭하면 <code>ISelectable</code> 인터페이스를 통해 정보가 표시됩니다.<br><br>
+        ※ 날아가는 <strong>포탄(Shell)</strong>은 독립 클래스로 <code>ISelectable</code>을 구현하지 않아 클릭해도 정보가 뜨지 않습니다.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>3. 적 유닛 도감</h2>
+      <div class="legend">
+        • <b>보병</b>: HP 50 / 기본 이동속도<br>
+        • <b>빠른 보병</b>: HP 30 / 속도 2배<br>
+        • <b>비행 적</b>: HP 45 / 대포 타워 면역<br>
+        • <b>분열하는 적</b>: HP 60 / 사망 시 작은 적 2기 분열<br>
+        • <b>보스</b>: HP 320 / 얼음 타워 감속 면역
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * ============================================================================
+ * 1. 인터페이스 규약 (ISelectable)
+ * - JavaScript에는 내장 interface 키워드가 없으므로, 공통 규약(메서드 계약)을
+ *   정의하는 베이스 규약 클래스 및 타입 판별 헬퍼(isSelectable)로 엄격히 구현.
+ * - 타워(Tower)와 적(Enemy)은 ISelectable 규약을 구현하며,
+ *   포탄(Shell)은 독립 클래스이므로 ISelectable을 구현하지 않음.
+ * ============================================================================
+ */
+class ISelectable {
+  containsPoint(px, py) {
+    throw new Error("ISelectable.containsPoint(px, py)를 구현해야 합니다.");
+  }
+  getSelectionInfo() {
+    throw new Error("ISelectable.getSelectionInfo()를 구현해야 합니다.");
+  }
+}
+
+function implementsISelectable(obj) {
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    typeof obj.containsPoint === "function" &&
+    typeof obj.getSelectionInfo === "function"
+  );
+}
+
+/**
+ * ============================================================================
+ * 2. 추상 클래스: Tower (타워)
+ * - 타워 디펜스의 공통 규칙(위치, 사거리, 쿨타임 갱신, 버프 초기화, 선택 영역, 렌더링 틀)만 정의.
+ * - 직접 인스턴스화를 금지하며(new.target === Tower), 구체적인 행동은
+ *   하위 클래스가 act(context) 메서드를 오버라이딩하여 다형적으로 수행.
+ * ============================================================================
+ */
+class Tower {
+  constructor(x, y, name, range, cooldown, cost, color) {
+    if (new.target === Tower) {
+      throw new Error("추상 클래스 Tower는 직접 인스턴스화할 수 없습니다.");
+    }
+    this.x = x;
+    this.y = y;
+    this.radius = 18;
+    this.name = name;
+    this.baseRange = range;
+    this.baseCooldown = cooldown;
+    this.cost = cost;
+    this.color = color;
+
+    this.timer = 0;
+    this.damageMultiplier = 1.0;
+    this.speedMultiplier = 1.0;
+    this.rangeBonus = 0;
+    this.isBuffed = false;
+  }
+
+  // 매 프레임 지원 타워 버프 초기화 (공통 규칙)
+  resetBuffs() {
+    this.damageMultiplier = 1.0;
+    this.speedMultiplier = 1.0;
+    this.rangeBonus = 0;
+    this.isBuffed = false;
+  }
+
+  get effectiveRange() {
+    return this.baseRange + this.rangeBonus;
+  }
+
+  get effectiveCooldown() {
+    return this.baseCooldown / this.speedMultiplier;
+  }
+
+  // 공통 갱신 루프 (템플릿 메서드 패턴)
+  update(dt, context) {
+    this.timer += dt;
+    if (this.timer >= this.effectiveCooldown) {
+      const acted = this.act(context);
+      if (acted) {
+        this.timer = 0;
+      }
+    }
+  }
+
+  // 추상 메서드: 하위 클래스에서 반드시 오버라이딩 (다형성 핵심)
+  act(context) {
+    throw new Error("하위 타워 클래스에서 act(context)를 구현해야 합니다.");
+  }
+
+  // 사거리 내 적 필터링 공통 유틸리티
+  findEnemiesInRange(enemies, predicate = () => true) {
+    const r = this.effectiveRange;
+    return enemies.filter((enemy) => {
+      if (enemy.isDead || enemy.reachedEnd) return false;
+      if (!predicate(enemy)) return false;
+      const dist = Math.hypot(enemy.x - this.x, enemy.y - this.y);
+      return dist <= r;
+    });
+  }
+
+  // ISelectable 구현: 클릭 히트 판정
+  containsPoint(px, py) {
+    return Math.hypot(px - this.x, py - this.y) <= this.radius + 4;
+  }
+
+  // ISelectable 구현: 기본 정보 반환 (하위 클래스에서 확장 가능)
+  getSelectionInfo() {
+    return {
+      category: "타워 (Tower)",
+      title: this.name,
+      details: [
+        `사거리: ${Math.round(this.effectiveRange)}px ${this.isBuffed ? "(강화됨)" : ""}`,
+        `행동 주기: ${this.effectiveCooldown.toFixed(2)}초`,
+        `강화 상태: ${this.isBuffed ? "지원 타워 버프 적용 중" : "기본 상태"}`
+      ]
+    };
+  }
+
+  // 공통 렌더링 규칙
+  render(ctx, isSelected) {
+    if (isSelected) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.effectiveRange, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(122, 162, 247, 0.12)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(122, 162, 247, 0.65)";
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 지원 타워 버프 오라 표시
+    if (this.isBuffed) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = "#e0af68";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 타워 본체
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.lineWidth = isSelected ? 3 : 2;
+    ctx.strokeStyle = isSelected ? "#ffffff" : "#141824";
+    ctx.stroke();
+
+    this.renderSymbol(ctx);
+  }
+
+  renderSymbol(ctx) {}
+}
+
+/**
+ * ============================================================================
+ * 3. 구체 타워 클래스들 (다형성 구현)
+ * ============================================================================
+ */
+
+// 3-1. 화살 타워: 단일 타겟 공격 (지상/비행 모두 타격 가능)
+class ArrowTower extends Tower {
+  constructor(x, y) {
+    super(x, y, "화살 타워", 145, 0.55, 50, "#9ece6a");
+    this.baseDamage = 16;
+  }
+
+  act(context) {
+    const candidates = this.findEnemiesInRange(context.enemies);
+    if (candidates.length === 0) return false;
+
+    // 경로를 가장 많이 진행한 단일 적 우선 타겟팅
+    candidates.sort((a, b) => b.distanceTraveled - a.distanceTraveled);
+    const target = candidates[0];
+    const dmg = Math.round(this.baseDamage * this.damageMultiplier);
+
+    target.takeDamage(dmg, "arrow", context);
+    context.effects.push({
+      type: "line",
+      x1: this.x,
+      y1: this.y,
+      x2: target.x,
+      y2: target.y,
+      color: "#d9f99d",
+      life: 0.12
+    });
+    return true;
+  }
+
+  getSelectionInfo() {
+    const base = super.getSelectionInfo();
+    base.details.unshift(`공격력: ${Math.round(this.baseDamage * this.damageMultiplier)} (단일 타겟)`);
+    return base;
+  }
+
+  renderSymbol(ctx) {
+    ctx.fillStyle = "#141824";
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("🏹", this.x, this.y);
+  }
+}
+
+// 3-2. 대포 타워: 범위 타겟 포탄 발사, 비행 적 타격 불가
+class CannonTower extends Tower {
+  constructor(x, y) {
+    super(x, y, "대포 타워", 135, 1.45, 80, "#f7768e");
+    this.baseDamage = 28;
+    this.splashRadius = 52;
+  }
+
+  act(context) {
+    // 비행 적(isFlying)은 타겟에서 제외
+    const candidates = this.findEnemiesInRange(context.enemies, (e) => !e.isFlying);
+    if (candidates.length === 0) return false;
+
+    candidates.sort((a, b) => b.distanceTraveled - a.distanceTraveled);
+    const target = candidates[0];
+    const dmg = Math.round(this.baseDamage * this.damageMultiplier);
+
+    // 독립 클래스 Shell(포탄) 인스턴스 생성 및 발사
+    context.shells.push(
+      new Shell(this.x, this.y, target.x, target.y, dmg, this.splashRadius)
+    );
+    return true;
+  }
+
+  getSelectionInfo() {
+    const base = super.getSelectionInfo();
+    base.details.unshift(`폭발 피해: ${Math.round(this.baseDamage * this.damageMultiplier)} (반경 ${this.splashRadius}px)`);
+    base.details.push("특수: 지상 적 전용 (비행 적 타격 불가)");
+    return base;
+  }
+
+  renderSymbol(ctx) {
+    ctx.fillStyle = "#141824";
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("💣", this.x, this.y);
+  }
+}
+
+// 3-3. 얼음 타워: 범위 내 적 이동 속도 감소 (보스는 면역)
+class IceTower extends Tower {
+  constructor(x, y) {
+    super(x, y, "얼음 타워", 120, 0.8, 70, "#7dcfff");
+    this.slowRatio = 0.45; // 45% 감속
+    this.slowDuration = 1.6;
+  }
+
+  act(context) {
+    const candidates = this.findEnemiesInRange(context.enemies);
+    if (candidates.length === 0) return false;
+
+    const effectiveSlow = Math.min(0.7, this.slowRatio * this.damageMultiplier);
+    for (const enemy of candidates) {
+      enemy.applySlow(effectiveSlow, this.slowDuration);
+    }
+
+    context.effects.push({
+      type: "pulse",
+      x: this.x,
+      y: this.y,
+      maxR: this.effectiveRange,
+      color: "rgba(125, 207, 255, 0.45)",
+      life: 0.3
+    });
+    return true;
+  }
+
+  getSelectionInfo() {
+    const base = super.getSelectionInfo();
+    const pct = Math.round(Math.min(0.7, this.slowRatio * this.damageMultiplier) * 100);
+    base.details.unshift(`감속 효과: 범위 내 이동속도 -${pct}% (${this.slowDuration}초)`);
+    base.details.push("특수: 보스 적은 감속에 면역");
+    return base;
+  }
+
+  renderSymbol(ctx) {
+    ctx.fillStyle = "#141824";
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("❄️", this.x, this.y);
+  }
+}
+
+// 3-4. 지원 타워: 공격 기능 없음, 주변 타워 강화
+class SupportTower extends Tower {
+  constructor(x, y) {
+    super(x, y, "지원 타워", 125, 0.1, 90, "#e0af68");
+  }
+
+  // 공격 대신 사거리 내 아군 타워들의 스탯을 강화
+  act(context) {
+    let buffedCount = 0;
+    for (const tower of context.towers) {
+      if (tower === this || tower instanceof SupportTower) continue;
+      const dist = Math.hypot(tower.x - this.x, tower.y - this.y);
+      if (dist <= this.effectiveRange) {
+        tower.damageMultiplier = Math.max(tower.damageMultiplier, 1.3);
+        tower.speedMultiplier = Math.max(tower.speedMultiplier, 1.25);
+        tower.rangeBonus = Math.max(tower.rangeBonus, 20);
+        tower.isBuffed = true;
+        buffedCount++;
+      }
+    }
+    return buffedCount > 0;
+  }
+
+  getSelectionInfo() {
+    const base = super.getSelectionInfo();
+    base.details.unshift("공격 기능 없음 · 주변 타워 강화 오라");
+    base.details.push("버프 효과: 공격력 +30%, 공속 +25%, 사거리 +20px");
+    return base;
+  }
+
+  renderSymbol(ctx) {
+    ctx.fillStyle = "#141824";
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("✨", this.x, this.y);
+  }
+}
+
+/**
+ * ============================================================================
+ * 4. 독립 클래스: Shell (포탄)
+ * - 대포 타워가 발사하는 투사체.
+ * - ISelectable을 구현하지 않으므로 클릭해도 선택 정보가 표시되지 않음.
+ * ============================================================================
+ */
+class Shell {
+  constructor(startX, startY, targetX, targetY, damage, splashRadius) {
+    this.x = startX;
+    this.y = startY;
+    this.targetX = targetX;
+    this.targetY = targetY;
+    this.damage = damage;
+    this.splashRadius = splashRadius;
+    this.speed = 340;
+    this.exploded = false;
+  }
+
+  update(dt, context) {
+    if (this.exploded) return;
+
+    const dx = this.targetX - this.x;
+    const dy = this.targetY - this.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist <= this.speed * dt || dist < 4) {
+      this.x = this.targetX;
+      this.y = this.targetY;
+      this.explode(context);
+    } else {
+      this.x += (dx / dist) * this.speed * dt;
+      this.y += (dy / dist) * this.speed * dt;
+    }
+  }
+
+  explode(context) {
+    this.exploded = true;
+    // 범위 내 적에게 피해 (비행 적은 takeDamage 내부 또는 여기서 면역 처리)
+    for (const enemy of context.enemies) {
+      if (enemy.isDead || enemy.reachedEnd) continue;
+      const dist = Math.hypot(enemy.x - this.x, enemy.y - this.y);
+      if (dist <= this.splashRadius) {
+        enemy.takeDamage(this.damage, "cannon", context);
+      }
+    }
+
+    context.effects.push({
+      type: "explosion",
+      x: this.x,
+      y: this.y,
+      maxR: this.splashRadius,
+      color: "rgba(247, 118, 142, 0.55)",
+      life: 0.25
+    });
+  }
+
+  render(ctx) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "#ff9e64";
+    ctx.fill();
+    ctx.strokeStyle = "#141824";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+}
+
+/**
+ * ============================================================================
+ * 5. 적 베이스 클래스 & 다형적 하위 클래스 (Enemy)
+ * - ISelectable 규약 구현
+ * - 보병(HP50), 빠른보병(HP30, 속도2배), 비행적(대포면역), 보스(얼음면역),
+ *   분열하는 적(사망 시 작은 적 둘로 분열)
+ * ============================================================================
+ */
+class Enemy {
+  constructor(path, { name, maxHp, speed, reward, radius, color, isFlying = false, immuneToIce = false, immuneToCannon = false }) {
+    this.path = path;
+    this.waypointIndex = 0;
+    this.x = path[0].x;
+    this.y = path[0].y;
+
+    this.name = name;
+    this.maxHp = maxHp;
+    this.hp = maxHp;
+    this.baseSpeed = speed;
+    this.reward = reward;
+    this.radius = radius;
+    this.color = color;
+
+    this.isFlying = isFlying;
+    this.immuneToIce = immuneToIce;
+    this.immuneToCannon = immuneToCannon;
+
+    this.slowRatio = 0;
+    this.slowTimer = 0;
+    this.distanceTraveled = 0;
+    this.isDead = false;
+    this.reachedEnd = false;
+  }
+
+  applySlow(ratio, duration) {
+    if (this.immuneToIce) return; // 보스 면역
+    this.slowRatio = Math.max(this.slowRatio, ratio);
+    this.slowTimer = Math.max(this.slowTimer, duration);
+  }
+
+  takeDamage(amount, sourceType, context) {
+    if (this.isDead) return;
+    if (sourceType === "cannon" && this.immuneToCannon) return; // 비행 적 면역
+
+    this.hp -= amount;
+    if (this.hp <= 0) {
+      this.hp = 0;
+      this.isDead = true;
+      context.addGold(this.reward);
+      this.onDeath(context);
+    }
+  }
+
+  // 다형성 훅: 사망 시 특수 행동 (분열하는 적 등에서 오버라이딩)
+  onDeath(context) {}
+
+  update(dt) {
+    if (this.isDead || this.reachedEnd) return;
+
+    if (this.slowTimer > 0) {
+      this.slowTimer -= dt;
+      if (this.slowTimer <= 0) {
+        this.slowRatio = 0;
+      }
+    }
+
+    const currentSpeed = this.baseSpeed * (1 - this.slowRatio);
+    let moveStep = currentSpeed * dt;
+
+    while (moveStep > 0 && this.waypointIndex < this.path.length - 1) {
+      const nextPt = this.path[this.waypointIndex + 1];
+      const dx = nextPt.x - this.x;
+      const dy = nextPt.y - this.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist <= moveStep) {
+        this.x = nextPt.x;
+        this.y = nextPt.y;
+        this.distanceTraveled += dist;
+        moveStep -= dist;
+        this.waypointIndex++;
+      } else {
+        this.x += (dx / dist) * moveStep;
+        this.y += (dy / dist) * moveStep;
+        this.distanceTraveled += moveStep;
+        moveStep = 0;
+      }
+    }
+
+    if (this.waypointIndex >= this.path.length - 1) {
+      this.reachedEnd = true;
+    }
+  }
+
+  // ISelectable 구현
+  containsPoint(px, py) {
+    return Math.hypot(px - this.x, py - this.y) <= this.radius + 5;
+  }
+
+  getSelectionInfo() {
+    const traits = [];
+    if (this.immuneToCannon) traits.push("대포 타워 면역 (비행)");
+    if (this.immuneToIce) traits.push("얼음 타워 면역");
+    if (this instanceof SplittingEnemy) traits.push("사망 시 작은 적 2기로 분열");
+    if (traits.length === 0) traits.push("특수 면역 없음");
+
+    return {
+      category: "적 유닛 (Enemy)",
+      title: this.name,
+      details: [
+        `체력(HP): ${Math.ceil(this.hp)} / ${this.maxHp}`,
+        `이동 속도: ${Math.round(this.baseSpeed * (1 - this.slowRatio))} px/s ${this.slowTimer > 0 ? "(감속됨)" : ""}`,
+        `특성: ${traits.join(", ")}`
+      ]
+    };
+  }
+
+  render(ctx, isSelected) {
+    if (this.isDead || this.reachedEnd) return;
+
+    // 비행 적 그림자 연출
+    if (this.isFlying) {
+      ctx.beginPath();
+      ctx.ellipse(this.x, this.y + 14, this.radius * 0.8, this.radius * 0.4, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(0,0,0,0.35)";
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+
+    // 감속 상태 테두리 표시
+    if (this.slowTimer > 0) {
+      ctx.strokeStyle = "#7dcfff";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    } else if (isSelected) {
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    } else {
+      ctx.strokeStyle = "#141824";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // 체력바
+    const barW = Math.max(24, this.radius * 2.2);
+    const barH = 4;
+    const bx = this.x - barW / 2;
+    const by = this.y - this.radius - 9;
+    ctx.fillStyle = "#141824";
+    ctx.fillRect(bx, by, barW, barH);
+    ctx.fillStyle = "#9ece6a";
+    ctx.fillRect(bx, by, barW * (this.hp / this.maxHp), barH);
+  }
+}
+
+// 5-1. 보병 (HP 50, 기본 속도)
+class InfantryEnemy extends Enemy {
+  constructor(path) {
+    super(path, {
+      name: "보병",
+      maxHp: 50,
+      speed: 65,
+      reward: 12,
+      radius: 12,
+      color: "#a9b1d6"
+    });
+  }
+}
+
+// 5-2. 빠른 보병 (HP 30, 속도 2배)
+class FastInfantryEnemy extends Enemy {
+  constructor(path) {
+    super(path, {
+      name: "빠른 보병",
+      maxHp: 30,
+      speed: 130, // 기본 보병(65)의 2배
+      reward: 15,
+      radius: 10,
+      color: "#ff9e64"
+    });
+  }
+}
+
+// 5-3. 비행 적 (대포 타워에 면역)
+class FlyingEnemy extends Enemy {
+  constructor(path) {
+    super(path, {
+      name: "비행 적",
+      maxHp: 45,
+      speed: 85,
+      reward: 18,
+      radius: 12,
+      color: "#7dcfff",
+      isFlying: true,
+      immuneToCannon: true
+    });
+  }
+}
+
+// 5-4. 보스 (얼음 타워에 면역)
+class BossEnemy extends Enemy {
+  constructor(path) {
+    super(path, {
+      name: "보스",
+      maxHp: 320,
+      speed: 42,
+      reward: 65,
+      radius: 20,
+      color: "#f7768e",
+      immuneToIce: true
+    });
+  }
+}
+
+// 5-5. 분열하는 적 (죽으면 작은 적 둘로 나뉨)
+class MiniSplitEnemy extends Enemy {
+  constructor(path, x, y, waypointIndex, distanceTraveled) {
+    super(path, {
+      name: "분열된 작은 적",
+      maxHp: 22,
+      speed: 95,
+      reward: 6,
+      radius: 8,
+      color: "#c0caf5"
+    });
+    this.x = x;
+    this.y = y;
+    this.waypointIndex = waypointIndex;
+    this.distanceTraveled = distanceTraveled;
+  }
+}
+
+class SplittingEnemy extends Enemy {
+  constructor(path) {
+    super(path, {
+      name: "분열하는 적",
+      maxHp: 60,
+      speed: 58,
+      reward: 16,
+      radius: 15,
+      color: "#bb9af7"
+    });
+  }
+
+  onDeath(context) {
+    // 사망 지점에서 작은 적 2기 생성
+    const offsets = [-10, 10];
+    for (const off of offsets) {
+      const mini = new MiniSplitEnemy(
+        this.path,
+        this.x + off,
+        this.y + off * 0.5,
+        this.waypointIndex,
+        this.distanceTraveled
+      );
+      context.spawnQueue.push(mini);
+    }
+  }
+}
+
+/**
+ * ============================================================================
+ * 6. 게임 엔진 (입력 Input · 갱신 Update · 렌더링 Render 루프)
+ * ============================================================================
+ */
+class TowerDefenseGame {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+
+    // 이동 경로 정의
+    this.path = [
+      { x: 0, y: 90 },
+      { x: 210, y: 90 },
+      { x: 210, y: 390 },
+      { x: 460, y: 390 },
+      { x: 460, y: 150 },
+      { x: 740, y: 150 }
+    ];
+
+    this.gold = 350;
+    this.life = 20;
+    this.wave = 0;
+
+    this.towers = [];
+    this.enemies = [];
+    this.shells = [];
+    this.effects = [];
+    this.spawnQueue = [];
+
+    this.waveRoster = [];
+    this.spawnTimer = 0;
+
+    this.buildType = "arrow";
+    this.selectedEntity = null; // ISelectable 구현체만 저장 가능
+    this.mousePos = { x: -100, y: -100 };
+
+    this.lastTime = performance.now();
+    this.bindInputs();
+    this.updateHUD();
+  }
+
+  // --- [1] 입력 (Input) 처리 ---
+  bindInputs() {
+    document.querySelectorAll(".tower-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tower-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        this.buildType = btn.dataset.type;
+      });
+    });
+
+    document.getElementById("btnCancelBuild").addEventListener("click", () => {
+      this.buildType = null;
+      this.selectedEntity = null;
+      document.querySelectorAll(".tower-btn").forEach((b) => b.classList.remove("active"));
+      this.renderSelectionPanel();
+    });
+
+    document.getElementById("btnNextWave").addEventListener("click", () => {
+      this.startNextWave();
+    });
+
+    this.canvas.addEventListener("mousemove", (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      this.mousePos.x = e.clientX - rect.left;
+      this.mousePos.y = e.clientY - rect.top;
+    });
+
+    this.canvas.addEventListener("click", (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      this.handleCanvasClick(x, y);
+    });
+  }
+
+  handleCanvasClick(x, y) {
+    // 1) ISelectable 객체(타워, 적) 선택 판정 우선 수행
+    // ※ this.shells(포탄)는 ISelectable이 아니므로 검사 대상에서 제외됨
+    const selectableCandidates = [...this.towers, ...this.enemies];
+    for (let i = selectableCandidates.length - 1; i >= 0; i--) {
+      const entity = selectableCandidates[i];
+      if (implementsISelectable(entity) && entity.containsPoint(x, y)) {
+        this.selectedEntity = entity;
+        this.renderSelectionPanel();
+        return;
+      }
+    }
+
+    // 2) 빈 공간 클릭 시 건설 모드가 활성화되어 있으면 타워 건설 시도
+    if (this.buildType) {
+      if (this.canBuildAt(x, y)) {
+        const tower = this.createTower(this.buildType, x, y);
+        if (tower && this.gold >= tower.cost) {
+          this.gold -= tower.cost;
+          this.towers.push(tower);
+          this.selectedEntity = tower;
+          this.updateHUD();
+          this.renderSelectionPanel();
+        }
+      }
+    } else {
+      this.selectedEntity = null;
+      this.renderSelectionPanel();
+    }
+  }
+
+  createTower(type, x, y) {
+    switch (type) {
+      case "arrow": return new ArrowTower(x, y);
+      case "cannon": return new CannonTower(x, y);
+      case "ice": return new IceTower(x, y);
+      case "support": return new SupportTower(x, y);
+      default: return null;
+    }
+  }
+
+  canBuildAt(x, y) {
+    if (x < 24 || x > this.canvas.width - 24 || y < 24 || y > this.canvas.height - 24) return false;
+    // 다른 타워와 겹침 방지
+    for (const t of this.towers) {
+      if (Math.hypot(t.x - x, t.y - y) < 38) return false;
+    }
+    // 길(Path) 위 건설 방지
+    for (let i = 0; i < this.path.length - 1; i++) {
+      if (this.distToSegment(x, y, this.path[i], this.path[i + 1]) < 34) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  distToSegment(px, py, v, w) {
+    const l2 = (v.x - w.x) ** 2 + (v.y - w.y) ** 2;
+    if (l2 === 0) return Math.hypot(px - v.x, py - v.y);
+    let t = ((px - v.x) * (w.x - v.x) + (py - v.y) * (w.y - v.y)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(px - (v.x + t * (w.x - v.x)), py - (v.y + t * (w.y - v.y)));
+  }
+
+  startNextWave() {
+    if (this.waveRoster.length > 0) return;
+    this.wave++;
+    this.updateHUD();
+
+    const roster = [
+      () => new InfantryEnemy(this.path),
+      () => new InfantryEnemy(this.path),
+      () => new FastInfantryEnemy(this.path),
+      () => new SplittingEnemy(this.path),
+      () => new FlyingEnemy(this.path),
+      () => new FastInfantryEnemy(this.path),
+      () => new SplittingEnemy(this.path),
+      () => new FlyingEnemy(this.path)
+    ];
+
+    if (this.wave % 2 === 0 || this.wave >= 1) {
+      roster.push(() => new BossEnemy(this.path));
+    }
+    this.waveRoster = roster;
+    this.spawnTimer = 0.2;
+  }
+
+  addGold(amount) {
+    this.gold += amount;
+    this.updateHUD();
+  }
+
+  // --- [2] 갱신 (Update) 루프 ---
+  update(dt) {
+    // 웨이브 순차 스폰
+    if (this.waveRoster.length > 0) {
+      this.spawnTimer -= dt;
+      if (this.spawnTimer <= 0) {
+        const factory = this.waveRoster.shift();
+        this.enemies.push(factory());
+        this.spawnTimer = 0.85;
+      }
+    }
+
+    // 모든 타워 버프 초기화 후 지원 타워 우선 갱신 (다형적 호출)
+    for (const t of this.towers) t.resetBuffs();
+    for (const t of this.towers) {
+      if (t instanceof SupportTower) t.update(dt, this);
+    }
+    for (const t of this.towers) {
+      if (!(t instanceof SupportTower)) t.update(dt, this);
+    }
+
+    // 포탄(독립 클래스) 갱신
+    for (const shell of this.shells) {
+      shell.update(dt, this);
+    }
+    this.shells = this.shells.filter((s) => !s.exploded);
+
+    // 적 이동 및 상태 갱신 (다형적 호출)
+    for (const enemy of this.enemies) {
+      enemy.update(dt);
+      if (enemy.reachedEnd) {
+        this.life = Math.max(0, this.life - 1);
+        this.updateHUD();
+      }
+    }
+
+    // 분열하는 적 등이 생성한 신규 유닛 편입
+    if (this.spawnQueue.length > 0) {
+      this.enemies.push(...this.spawnQueue);
+      this.spawnQueue = [];
+    }
+
+    // 사망하거나 도착한 적 정리
+    this.enemies = this.enemies.filter((e) => !e.isDead && !e.reachedEnd);
+
+    // 선택된 적이 사망했으면 선택 해제
+    if (this.selectedEntity && this.selectedEntity.isDead) {
+      this.selectedEntity = null;
+      this.renderSelectionPanel();
+    } else if (this.selectedEntity instanceof Enemy) {
+      this.renderSelectionPanel();
+    }
+
+    // 시각 이펙트 수명 갱신
+    for (const ef of this.effects) ef.life -= dt;
+    this.effects = this.effects.filter((ef) => ef.life > 0);
+  }
+
+  // --- [3] 렌더링 (Render) 루프 ---
+  render() {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 배경 그리드
+    ctx.strokeStyle = "#22293d";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < this.canvas.width; x += 37) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, this.canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < this.canvas.height; y += 37) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(this.canvas.width, y); ctx.stroke();
+    }
+
+    // 적 이동 경로 렌더링
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(this.path[0].x, this.path[0].y);
+    for (let i = 1; i < this.path.length; i++) {
+      ctx.lineTo(this.path[i].x, this.path[i].y);
+    }
+    ctx.strokeStyle = "#2b334d";
+    ctx.lineWidth = 38;
+    ctx.stroke();
+
+    ctx.strokeStyle = "#3b4566";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 8]);
+    ctx.stroke();
+    ctx.restore();
+
+    // 타워 렌더링 (다형적 호출)
+    for (const tower of this.towers) {
+      tower.render(ctx, this.selectedEntity === tower);
+    }
+
+    // 적 렌더링 (다형적 호출)
+    for (const enemy of this.enemies) {
+      enemy.render(ctx, this.selectedEntity === enemy);
+    }
+
+    // 포탄 렌더링 (독립 클래스)
+    for (const shell of this.shells) {
+      shell.render(ctx);
+    }
+
+    // 공격/폭발 이펙트 렌더링
+    for (const ef of this.effects) {
+      ctx.save();
+      if (ef.type === "line") {
+        ctx.beginPath();
+        ctx.moveTo(ef.x1, ef.y1);
+        ctx.lineTo(ef.x2, ef.y2);
+        ctx.strokeStyle = ef.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else if (ef.type === "pulse" || ef.type === "explosion") {
+        ctx.beginPath();
+        ctx.arc(ef.x, ef.y, ef.maxR, 0, Math.PI * 2);
+        ctx.fillStyle = ef.color;
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 타워 건설 미리보기
+    if (this.buildType && this.mousePos.x >= 0) {
+      const ok = this.canBuildAt(this.mousePos.x, this.mousePos.y);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(this.mousePos.x, this.mousePos.y, 18, 0, Math.PI * 2);
+      ctx.fillStyle = ok ? "rgba(158, 206, 106, 0.45)" : "rgba(247, 118, 142, 0.45)";
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  updateHUD() {
+    document.getElementById("uiGold").textContent = `골드: ${this.gold}G`;
+    document.getElementById("uiLife").textContent = `생명력: ${this.life}`;
+    document.getElementById("uiWave").textContent = `웨이브: ${this.wave}`;
+  }
+
+  renderSelectionPanel() {
+    const panel = document.getElementById("selectionPanel");
+    if (!this.selectedEntity || !implementsISelectable(this.selectedEntity)) {
+      panel.innerHTML = `선택된 대상이 없습니다.<br><br>타워나 적(<code>ISelectable</code>)을 클릭하면 상세 정보가 표시됩니다. 포탄은 클릭해도 선택되지 않습니다.`;
+      return;
+    }
+
+    const info = this.selectedEntity.getSelectionInfo();
+    const listHtml = info.details.map((d) => `• ${d}`).join("<br>");
+    panel.innerHTML = `
+      <span class="info-tag">${info.category}</span>
+      <div class="info-title">${info.title}</div>
+      <div>${listHtml}</div>
+    `;
+  }
+
+  loop(now) {
+    const dt = Math.min(0.05, (now - this.lastTime) / 1000);
+    this.lastTime = now;
+
+    this.update(dt);
+    this.render();
+
+    requestAnimationFrame((t) => this.loop(t));
+  }
+
+  start() {
+    requestAnimationFrame((t) => this.loop(t));
+  }
+}
+
+const game = new TowerDefenseGame(document.getElementById("gameCanvas"));
+game.start();
+</script>
+</body>
+</html>
